@@ -1,0 +1,367 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { Trophy, LayoutGrid, List } from "@lucide/astro";
+---
+
+<Layout title="Torneos">
+  <main class="mx-auto max-w-5xl px-6 py-10">
+    <header>
+      <p class="text-sm font-medium text-indigo-600">Campeonato</p>
+        <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
+          Torneos
+        </h1>
+      </header>
+
+      <section class="mt-8 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <div class="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+          <label class="block">
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Buscar torneos</span>
+            <input
+              id="filter-search"
+              type="search"
+              placeholder="Nombre o descripción"
+              class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-indigo-500/20"
+            />
+          </label>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Formato</span>
+              <select
+                id="filter-format"
+                class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-indigo-500/20"
+              >
+                <option value="">Todos</option>
+                <option value="LEAGUE">Liga</option>
+                <option value="KNOCKOUT">Eliminatoria</option>
+                <option value="GROUPS_KNOCKOUT">Grupos + Eliminatoria</option>
+              </select>
+            </label>
+
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Estado</span>
+              <select
+                id="filter-status"
+                class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-indigo-500/20"
+              >
+                <option value="">Todos</option>
+                <option value="DRAFT">Borrador</option>
+                <option value="REGISTRATION">Inscripciones</option>
+                <option value="IN_PROGRESS">En curso</option>
+                <option value="FINISHED">Finalizado</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Temporada</span>
+              <select
+                id="filter-season"
+                class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-indigo-500/20"
+              >
+                <option value="">Todas</option>
+              </select>
+            </label>
+
+            <label class="block">
+              <span class="text-sm font-medium text-slate-700 dark:text-slate-200">Fecha de inicio</span>
+              <input
+                id="filter-start-date"
+                type="date"
+                class="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:ring-indigo-500/20"
+              />
+            </label>
+
+            <div class="flex items-end">
+              <button
+                id="filter-reset"
+                type="button"
+                class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    <div class="mt-8 flex items-center justify-between">
+      <h2 class="text-lg font-medium text-slate-900 dark:text-slate-100">
+        Resultados
+      </h2>
+      <div class="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-950">
+        <button
+          id="btn-view-grid"
+          type="button"
+          class="rounded-md bg-slate-100 p-1.5 text-slate-700 transition dark:bg-slate-800 dark:text-slate-200"
+          aria-label="Vista de cuadrícula"
+          title="Vista de cuadrícula"
+        >
+          <LayoutGrid size={18} />
+        </button>
+        <button
+          id="btn-view-list"
+          type="button"
+          class="rounded-md p-1.5 text-slate-500 transition hover:bg-slate-50 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-slate-200"
+          aria-label="Vista de lista"
+          title="Vista de lista"
+        >
+          <List size={18} />
+        </button>
+      </div>
+    </div>
+
+    <section
+      id="loading"
+      class="mt-4 rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400"
+    ></section>
+
+    <section
+      id="empty"
+      hidden
+      class="mt-8 rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center"
+    >
+      <Trophy size={28} class="mx-auto text-slate-400" />
+      <p class="mt-3 text-sm text-slate-500">
+        Todavía no hay torneos publicados.
+      </p>
+    </section>
+
+    <ul
+      id="grid"
+      hidden
+      class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+      data-view="grid"
+    >
+    </ul>
+  </main>
+</Layout>
+
+<script>
+  import { api, ApiError, cloudinaryUrl, type Tournament } from "@/lib/api";
+
+  const FORMAT_LABEL: Record<Tournament["format"], string> = {
+    LEAGUE: "Liga",
+    KNOCKOUT: "Eliminatoria",
+    GROUPS_KNOCKOUT: "Grupos + Eliminatoria",
+  };
+
+  const STATUS_LABEL: Record<Tournament["status"], string> = {
+    DRAFT: "Borrador",
+    REGISTRATION: "Inscripciones abiertas",
+    IN_PROGRESS: "En curso",
+    FINISHED: "Finalizado",
+  };
+
+  const STATUS_COLOR: Record<Tournament["status"], string> = {
+    DRAFT: "bg-slate-100 text-slate-600",
+    REGISTRATION: "bg-emerald-100 text-emerald-700",
+    IN_PROGRESS: "bg-indigo-100 text-indigo-700",
+    FINISHED: "bg-slate-100 text-slate-500",
+  };
+
+  const loading = document.getElementById("loading") as HTMLElement;
+  const empty = document.getElementById("empty") as HTMLElement;
+  const grid = document.getElementById("grid") as HTMLUListElement;
+  const searchInput = document.getElementById("filter-search") as HTMLInputElement | null;
+  const formatSelect = document.getElementById("filter-format") as HTMLSelectElement | null;
+  const statusSelect = document.getElementById("filter-status") as HTMLSelectElement | null;
+  const seasonSelect = document.getElementById("filter-season") as HTMLSelectElement | null;
+  const startDateInput = document.getElementById("filter-start-date") as HTMLInputElement | null;
+  const resetButton = document.getElementById("filter-reset") as HTMLButtonElement | null;
+  
+  const btnViewGrid = document.getElementById("btn-view-grid") as HTMLButtonElement | null;
+  const btnViewList = document.getElementById("btn-view-list") as HTMLButtonElement | null;
+
+  let currentView: "grid" | "list" = (localStorage.getItem("tournament-view") as "grid" | "list") || "grid";
+
+  function updateViewButtons() {
+    if (currentView === "grid") {
+      btnViewGrid?.classList.add("bg-slate-100", "text-slate-700", "dark:bg-slate-800", "dark:text-slate-200");
+      btnViewGrid?.classList.remove("text-slate-500", "hover:bg-slate-50", "hover:text-slate-700", "dark:text-slate-400", "dark:hover:bg-slate-900", "dark:hover:text-slate-200");
+      
+      btnViewList?.classList.remove("bg-slate-100", "text-slate-700", "dark:bg-slate-800", "dark:text-slate-200");
+      btnViewList?.classList.add("text-slate-500", "hover:bg-slate-50", "hover:text-slate-700", "dark:text-slate-400", "dark:hover:bg-slate-900", "dark:hover:text-slate-200");
+      
+      grid.className = "mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3";
+    } else {
+      btnViewList?.classList.add("bg-slate-100", "text-slate-700", "dark:bg-slate-800", "dark:text-slate-200");
+      btnViewList?.classList.remove("text-slate-500", "hover:bg-slate-50", "hover:text-slate-700", "dark:text-slate-400", "dark:hover:bg-slate-900", "dark:hover:text-slate-200");
+      
+      btnViewGrid?.classList.remove("bg-slate-100", "text-slate-700", "dark:bg-slate-800", "dark:text-slate-200");
+      btnViewGrid?.classList.add("text-slate-500", "hover:bg-slate-50", "hover:text-slate-700", "dark:text-slate-400", "dark:hover:bg-slate-900", "dark:hover:text-slate-200");
+      
+      grid.className = "mt-4 flex flex-col gap-4";
+    }
+    
+    // Re-render cards to apply list/grid specific styles
+    Array.from(grid.children).forEach((li) => {
+      const link = li.firstChild as HTMLElement;
+      if (link) {
+        if (currentView === "list") {
+          link.className = "flex flex-col sm:flex-row items-stretch";
+          (link.firstChild as HTMLElement).className = "h-32 w-full sm:w-48 sm:h-auto shrink-0 bg-gradient-to-br from-indigo-500 to-indigo-700";
+        } else {
+          link.className = "block";
+          (link.firstChild as HTMLElement).className = "h-32 w-full bg-gradient-to-br from-indigo-500 to-indigo-700";
+        }
+      }
+    });
+  }
+
+  btnViewGrid?.addEventListener("click", () => {
+    currentView = "grid";
+    localStorage.setItem("tournament-view", "grid");
+    updateViewButtons();
+  });
+
+  btnViewList?.addEventListener("click", () => {
+    currentView = "list";
+    localStorage.setItem("tournament-view", "list");
+    updateViewButtons();
+  });
+
+  function renderCard(t: Tournament): HTMLLIElement {
+    const li = document.createElement("li");
+    li.className =
+      "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:border-slate-800 dark:bg-slate-900";
+
+    const link = document.createElement("a");
+    link.href = `/torneos/ver?id=${encodeURIComponent(t.id)}`;
+    link.className = currentView === "list" ? "flex flex-col sm:flex-row items-stretch" : "block";
+
+    const banner = document.createElement("div");
+    banner.className = currentView === "list" 
+      ? "h-32 w-full sm:w-48 sm:h-auto shrink-0 bg-gradient-to-br from-indigo-500 to-indigo-700" 
+      : "h-32 w-full bg-gradient-to-br from-indigo-500 to-indigo-700";
+    const bannerUrl = cloudinaryUrl(
+      t.bannerUrl,
+      "w_600,h_240,c_fill,q_auto,f_auto",
+    );
+    if (bannerUrl) {
+      banner.style.backgroundImage = `url(${bannerUrl})`;
+      banner.style.backgroundSize = "cover";
+      banner.style.backgroundPosition = "center";
+    }
+
+    const body = document.createElement("div");
+    body.className = "p-5 flex-1 flex flex-col justify-center";
+
+    const badgeContainer = document.createElement("div");
+    const badge = document.createElement("span");
+    badge.className = `inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[t.status]}`;
+    badge.textContent = STATUS_LABEL[t.status];
+    badgeContainer.appendChild(badge);
+
+    const name = document.createElement("h2");
+    name.className = "mt-3 truncate text-lg font-semibold text-slate-900";
+    name.textContent = t.name;
+
+    const meta = document.createElement("p");
+    meta.className = "mt-1 text-xs text-slate-500 dark:text-slate-400";
+    const dateLabel = t.startDate
+      ? ` · Inicio ${new Date(t.startDate).toLocaleDateString("es-ES", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })}`
+      : "";
+    meta.textContent = `${FORMAT_LABEL[t.format]} · Temporada ${t.season}${dateLabel}`;
+
+    body.append(badgeContainer, name, meta);
+    link.append(banner, body);
+    li.appendChild(link);
+    return li;
+  }
+
+  function createOption(value: string, label: string) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    return option;
+  }
+
+  function renderGrid(items: Tournament[]) {
+    grid.replaceChildren(...items.map(renderCard));
+    grid.hidden = items.length === 0;
+    empty.hidden = items.length !== 0;
+  }
+
+  function normalize(value: string | null | undefined) {
+    return (value ?? "").toLowerCase();
+  }
+
+  function applyFilters(tournaments: Tournament[]) {
+    const query = normalize(searchInput?.value);
+    const selectedFormat = formatSelect?.value ?? "";
+    const selectedStatus = statusSelect?.value ?? "";
+    const selectedSeason = seasonSelect?.value ?? "";
+    const selectedStart = startDateInput?.value ?? "";
+
+    const filtered = tournaments.filter((t) => {
+      if (selectedFormat && t.format !== selectedFormat) {
+        return false;
+      }
+      if (selectedStatus && t.status !== selectedStatus) {
+        return false;
+      }
+      if (selectedSeason && t.season !== selectedSeason) {
+        return false;
+      }
+      if (selectedStart) {
+        if (!t.startDate) {
+          return false;
+        }
+        const tournamentDate = new Date(t.startDate).toISOString().slice(0, 10);
+        if (tournamentDate < selectedStart) {
+          return false;
+        }
+      }
+      if (query) {
+        const label = `${t.name} ${t.description ?? ""} ${t.season}`.toLowerCase();
+        if (!label.includes(query)) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    renderGrid(filtered);
+  }
+
+  function resetFilters(tournaments: Tournament[]) {
+    if (searchInput) searchInput.value = "";
+    if (formatSelect) formatSelect.value = "";
+    if (statusSelect) statusSelect.value = "";
+    if (seasonSelect) seasonSelect.value = "";
+    if (startDateInput) startDateInput.value = "";
+    renderGrid(tournaments);
+  }
+
+  try {
+    const tournaments = await api.listTournaments();
+    loading.hidden = true;
+
+    if (tournaments.length === 0) {
+      empty.hidden = false;
+    } else {
+      const seasons = Array.from(new Set(tournaments.map((t) => t.season))).sort((a, b) => b.localeCompare(a));
+      seasonSelect?.replaceChildren(createOption("", "Todas"), ...seasons.map((season) => createOption(season, season)));
+      renderGrid(tournaments);
+      grid.hidden = false;
+
+      const inputs = [searchInput, formatSelect, statusSelect, seasonSelect, startDateInput];
+      inputs.forEach((input) => input?.addEventListener("input", () => applyFilters(tournaments)));
+      resetButton?.addEventListener("click", (event) => {
+        event.preventDefault();
+        resetFilters(tournaments);
+      });
+      
+      updateViewButtons();
+    }
+  } catch (err) {
+    loading.textContent =
+      err instanceof ApiError ? err.messages.join(" · ") : "Error al cargar";
+  }
+</script>

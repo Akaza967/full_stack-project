@@ -1,0 +1,456 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import Field from "@/components/Field.astro";
+import Alert from "@/components/Alert.astro";
+import {
+  LogOut,
+  Mail,
+  IdCard,
+  Phone,
+  CalendarDays,
+  Clock,
+  Pencil,
+} from "@lucide/astro";
+---
+
+<Layout title="Mi perfil">
+  <main class="mx-auto max-w-3xl px-6 py-12">
+    <header class="flex items-center justify-between">
+      <div>
+        <p class="text-sm font-medium text-indigo-600">Mi cuenta</p>
+        <h1 class="mt-1 text-2xl font-semibold tracking-tight text-slate-900">
+          Perfil
+        </h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          id="edit-btn"
+          type="button"
+          hidden
+          class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+        >
+          <Pencil size={16} />
+          Editar
+        </button>
+        <button
+          id="logout-btn"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50 focus:outline-none focus:ring-4 focus:ring-slate-100"
+        >
+          <LogOut size={16} />
+          Cerrar sesión
+        </button>
+      </div>
+    </header>
+
+    <section
+      id="loading"
+      class="mt-8 rounded-2xl border border-slate-200 bg-white p-12 text-center text-sm text-slate-500"
+    >
+      Cargando…
+    </section>
+
+    <section
+      id="content"
+      hidden
+      class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+    >
+      <div class="flex items-center gap-4 border-b border-slate-100 px-6 py-5">
+        <div
+          id="avatar"
+          class="flex h-14 w-14 items-center justify-center rounded-full bg-indigo-600 text-lg font-semibold text-white"
+        >
+        </div>
+        <div>
+          <h2 id="full-name" class="text-base font-semibold text-slate-900"></h2>
+          <p id="email-display" class="flex items-center gap-1.5 text-sm text-slate-500">
+            <Mail size={14} />
+            <span></span>
+          </p>
+        </div>
+      </div>
+
+      <dl class="divide-y divide-slate-100 text-sm">
+        <div class="flex items-center justify-between px-6 py-4">
+          <dt class="flex items-center gap-2 text-slate-500">
+            <IdCard size={16} />
+            Documento
+          </dt>
+          <dd id="document" class="font-medium text-slate-900"></dd>
+        </div>
+        <div class="flex items-center justify-between px-6 py-4">
+          <dt class="flex items-center gap-2 text-slate-500">
+            <Phone size={16} />
+            Teléfono
+          </dt>
+          <dd id="phone-value" class="font-medium text-slate-900"></dd>
+        </div>
+        <div class="flex items-center justify-between px-6 py-4">
+          <dt class="flex items-center gap-2 text-slate-500">
+            <CalendarDays size={16} />
+            Fecha de nacimiento
+          </dt>
+          <dd id="birth-date" class="font-medium text-slate-900"></dd>
+        </div>
+        <div class="flex items-center justify-between px-6 py-4">
+          <dt class="flex items-center gap-2 text-slate-500">
+            <Clock size={16} />
+            Miembro desde
+          </dt>
+          <dd id="created-at" class="font-medium text-slate-900"></dd>
+        </div>
+      </dl>
+
+      <div class="border-t border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-900/50">
+        <h3 class="text-sm font-semibold text-slate-900 dark:text-slate-100">Información deportiva</h3>
+        <dl class="mt-3 divide-y divide-slate-100 text-sm dark:divide-slate-800">
+          <div class="flex items-center justify-between py-2">
+            <dt class="text-slate-500 dark:text-slate-400">Club favorito</dt>
+            <dd id="favorite-club" class="font-medium text-slate-900 dark:text-slate-100">—</dd>
+          </div>
+          <div class="flex items-center justify-between py-2">
+            <dt class="text-slate-500 dark:text-slate-400">Posición preferida</dt>
+            <dd id="preferred-position" class="font-medium text-slate-900 dark:text-slate-100">—</dd>
+          </div>
+          <div class="flex items-center justify-between py-2">
+            <dt class="text-slate-500 dark:text-slate-400">Objetivo</dt>
+            <dd id="sports-objective" class="font-medium text-slate-900 dark:text-slate-100">—</dd>
+          </div>
+          <div class="py-2">
+            <dt class="text-slate-500 dark:text-slate-400">Biografía breve</dt>
+            <dd id="short-bio" class="mt-1 text-slate-900 dark:text-slate-100">—</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section
+      id="edit-section"
+      hidden
+      class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+    >
+      <div class="border-b border-slate-100 px-6 py-4">
+        <h2 class="text-base font-semibold text-slate-900">Editar perfil</h2>
+        <p class="text-sm text-slate-500">
+          El email y el documento no se pueden modificar.
+        </p>
+      </div>
+      <form id="edit-form" class="space-y-5 px-6 py-5" novalidate>
+        <Alert id="edit-error" />
+        <Alert id="edit-success" variant="success" />
+
+        <div class="grid grid-cols-2 gap-3">
+          <Field id="firstName" label="Nombres" autocomplete="given-name" required />
+          <Field id="lastName" label="Apellidos" autocomplete="family-name" required />
+        </div>
+
+        <Field
+          id="phone"
+          label="Teléfono"
+          type="tel"
+          placeholder="+51 987654321"
+          autocomplete="tel"
+        />
+
+        <Field id="birthDate" label="Fecha de nacimiento" type="date" />
+
+        <div class="grid grid-cols-2 gap-3">
+          <Field id="favoriteClub" label="Club favorito" placeholder="Ej. Real Madrid" />
+          <Field id="preferredPosition" label="Posición preferida" placeholder="Ej. Delantero" />
+        </div>
+
+        <Field id="sportsObjective" label="Objetivo deportivo" placeholder="Ej. Ganar el campeonato local" />
+
+        <div class="flex flex-col gap-1.5">
+          <label for="shortBio" class="text-sm font-medium text-slate-700 dark:text-slate-200">
+            Biografía breve
+          </label>
+          <textarea
+            id="shortBio"
+            name="shortBio"
+            rows="3"
+            placeholder="Un poco sobre ti..."
+            class="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-sm text-slate-900 shadow-sm transition placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+          ></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2">
+          <button
+            type="button"
+            id="cancel-btn"
+            class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-xs transition hover:bg-slate-50"
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            id="save-btn"
+            class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-200 disabled:cursor-not-allowed disabled:bg-indigo-400"
+          >
+            Guardar cambios
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section
+      id="favorites-section"
+      hidden
+      class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950"
+    >
+      <div class="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
+        <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">Mis favoritos</h2>
+      </div>
+      <div id="favorites-list" class="divide-y divide-slate-100 dark:divide-slate-800 p-6 flex flex-col gap-4">
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<script>
+  import {
+    api,
+    auth,
+    ApiError,
+    type MeResponse,
+    type UpdateProfilePayload,
+  } from "@/lib/api";
+
+  const token = auth.requireAuth();
+  if (!token) {
+    // requireAuth redirected; stop further work
+  } else {
+    const loading = document.getElementById("loading") as HTMLElement;
+    const content = document.getElementById("content") as HTMLElement;
+    const logoutBtn = document.getElementById("logout-btn") as HTMLButtonElement;
+    const editBtn = document.getElementById("edit-btn") as HTMLButtonElement;
+    const editSection = document.getElementById("edit-section") as HTMLElement;
+    const editForm = document.getElementById("edit-form") as HTMLFormElement;
+    const cancelBtn = document.getElementById("cancel-btn") as HTMLButtonElement;
+    const saveBtn = document.getElementById("save-btn") as HTMLButtonElement;
+    const editError = document.getElementById("edit-error") as HTMLElement;
+    const editSuccess = document.getElementById("edit-success") as HTMLElement;
+
+    logoutBtn.addEventListener("click", () => {
+      auth.clearToken();
+      window.location.href = "/login";
+    });
+
+    function formatDate(value: string | null, withTime = false): string {
+      if (!value) return "—";
+
+      // "YYYY-MM-DD" llega del backend para birthDate. Hay que parsearlo como
+      // fecha local, no UTC, o se desplaza un día al convertir a Perú (UTC-5).
+      const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+      const date = dateOnly
+        ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+        : new Date(value);
+
+      if (Number.isNaN(date.getTime())) return value;
+
+      return date.toLocaleDateString("es-PE", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        ...(withTime && { hour: "2-digit", minute: "2-digit" }),
+      });
+    }
+
+    function initials(first: string, last: string): string {
+      return `${first[0] ?? ""}${last[0] ?? ""}`.toUpperCase();
+    }
+
+    function setText(id: string, value: string) {
+      document.getElementById(id)!.textContent = value;
+    }
+
+    function renderProfile(me: MeResponse) {
+      const p = me.profile;
+      const fullName = p ? `${p.firstName} ${p.lastName}` : me.email;
+      setText("full-name", fullName);
+      document.querySelector("#email-display span")!.textContent = me.email;
+      document.getElementById("avatar")!.textContent = p
+        ? initials(p.firstName, p.lastName)
+        : (me.email[0] ?? "?").toUpperCase();
+      setText("document", p ? `${p.documentType} · ${p.documentNumber}` : "—");
+      setText("phone-value", p?.phone ?? "—");
+      setText("birth-date", formatDate(p?.birthDate ?? null));
+      setText("created-at", formatDate(p?.createdAt ?? null, true));
+      setText("favorite-club", p?.favoriteClub ?? "—");
+      setText("preferred-position", p?.preferredPosition ?? "—");
+      setText("sports-objective", p?.sportsObjective ?? "—");
+      setText("short-bio", p?.shortBio ?? "—");
+    }
+
+    function fillEditForm(me: MeResponse) {
+      const p = me.profile;
+      (editForm.elements.namedItem("firstName") as HTMLInputElement).value =
+        p?.firstName ?? "";
+      (editForm.elements.namedItem("lastName") as HTMLInputElement).value =
+        p?.lastName ?? "";
+      (editForm.elements.namedItem("phone") as HTMLInputElement).value =
+        p?.phone ?? "";
+      (editForm.elements.namedItem("birthDate") as HTMLInputElement).value =
+        p?.birthDate ?? "";
+      (editForm.elements.namedItem("favoriteClub") as HTMLInputElement).value =
+        p?.favoriteClub ?? "";
+      (editForm.elements.namedItem("preferredPosition") as HTMLInputElement).value =
+        p?.preferredPosition ?? "";
+      (editForm.elements.namedItem("sportsObjective") as HTMLInputElement).value =
+        p?.sportsObjective ?? "";
+      (editForm.elements.namedItem("shortBio") as HTMLTextAreaElement).value =
+        p?.shortBio ?? "";
+    }
+
+    function setMessages(el: HTMLElement, messages: string[]) {
+      el.replaceChildren(
+        ...messages.map((m) => {
+          const div = document.createElement("div");
+          div.textContent = m;
+          return div;
+        }),
+      );
+      el.hidden = false;
+    }
+
+    function clearMessages(el: HTMLElement) {
+      el.hidden = true;
+      el.replaceChildren();
+    }
+
+    function showEdit(me: MeResponse) {
+      fillEditForm(me);
+      clearMessages(editError);
+      clearMessages(editSuccess);
+      editSection.hidden = false;
+      editSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function hideEdit() {
+      editSection.hidden = true;
+    }
+
+    async function loadFavorites() {
+      const favSection = document.getElementById("favorites-section") as HTMLElement;
+      const favList = document.getElementById("favorites-list") as HTMLElement;
+      favSection.hidden = false;
+
+      try {
+        const favorites = await api.listFavorites(token);
+        if (favorites.length === 0) {
+          favList.innerHTML = '<p class="text-sm text-slate-500">Aún no has guardado favoritos.</p>';
+          return;
+        }
+
+        const favItems = await Promise.all(favorites.map(async (f) => {
+          if (f.type === "TEAM") {
+            const t = await api.getTeam(f.itemId).catch(()=>null);
+            return { ...f, title: t?.name ?? 'Equipo desconocido', href: `/equipos/ver?id=${f.itemId}`, subtitle: 'Equipo' };
+          } else {
+            const t = await api.getTournament(f.itemId).catch(()=>null);
+            return { ...f, title: t?.name ?? 'Torneo desconocido', href: `/torneos/ver?id=${f.itemId}`, subtitle: 'Torneo' };
+          }
+        }));
+
+        favList.replaceChildren(...favItems.map(item => {
+          const a = document.createElement("a");
+          a.href = item.href;
+          a.className = "flex items-center justify-between rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-900";
+          const info = document.createElement("div");
+          const title = document.createElement("p");
+          title.className = "font-medium text-slate-900 dark:text-slate-100";
+          title.textContent = item.title;
+          const sub = document.createElement("p");
+          sub.className = "text-xs text-slate-500 dark:text-slate-400 mt-0.5";
+          sub.textContent = item.subtitle;
+          info.append(title, sub);
+          
+          const icon = document.createElement("div");
+          icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-heart text-pink-500"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>`;
+          
+          a.append(info, icon);
+          return a;
+        }));
+      } catch (err) {
+        favList.innerHTML = '<p class="text-sm text-red-500">Error al cargar favoritos.</p>';
+      }
+    }
+
+    let currentMe: MeResponse | null = null;
+
+    editBtn.addEventListener("click", () => {
+      if (currentMe) showEdit(currentMe);
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      hideEdit();
+    });
+
+    editForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      clearMessages(editError);
+      clearMessages(editSuccess);
+
+      const formData = new FormData(editForm);
+      const phoneRaw = String(formData.get("phone") ?? "").trim();
+      const birthRaw = String(formData.get("birthDate") ?? "").trim();
+      const clubRaw = String(formData.get("favoriteClub") ?? "").trim();
+      const posRaw = String(formData.get("preferredPosition") ?? "").trim();
+      const objRaw = String(formData.get("sportsObjective") ?? "").trim();
+      const bioRaw = String(formData.get("shortBio") ?? "").trim();
+
+      const payload: UpdateProfilePayload = {
+        firstName: String(formData.get("firstName") ?? "").trim(),
+        lastName: String(formData.get("lastName") ?? "").trim(),
+        phone: phoneRaw === "" ? null : phoneRaw,
+        birthDate: birthRaw === "" ? null : birthRaw,
+        favoriteClub: clubRaw === "" ? null : clubRaw,
+        preferredPosition: posRaw === "" ? null : posRaw,
+        sportsObjective: objRaw === "" ? null : objRaw,
+        shortBio: bioRaw === "" ? null : bioRaw,
+      };
+
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Guardando…";
+
+      try {
+        const updated = await api.updateMe(token, payload);
+        currentMe = updated;
+        renderProfile(updated);
+        setMessages(editSuccess, ["Perfil actualizado correctamente"]);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 401) {
+          auth.clearToken();
+          window.location.href = "/login";
+          return;
+        }
+        setMessages(
+          editError,
+          err instanceof ApiError ? err.messages : ["Error inesperado"],
+        );
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Guardar cambios";
+      }
+    });
+
+    try {
+      currentMe = await api.me(token);
+      renderProfile(currentMe);
+
+      loading.hidden = true;
+      content.hidden = false;
+      editBtn.hidden = false;
+      
+      loadFavorites();
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) {
+        auth.clearToken();
+        window.location.href = "/login";
+      } else {
+        loading.textContent =
+          err instanceof ApiError ? err.messages.join(" · ") : "Error al cargar";
+      }
+    }
+  }
+</script>
