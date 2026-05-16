@@ -9,6 +9,8 @@ import { CloudinaryService } from '../media/cloudinary.service';
 import { CreateTournamentDto } from './dto/create-tournament.dto';
 import { UpdateTournamentDto } from './dto/update-tournament.dto';
 import { Tournament } from './entities/tournament.entity';
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { PaginatedResult } from '../common/interfaces/paginated-result.interface';
 
 @Injectable()
 export class TournamentsService {
@@ -18,10 +20,43 @@ export class TournamentsService {
     private readonly cloudinary: CloudinaryService,
   ) {}
 
-  findAll(): Promise<Tournament[]> {
-    return this.tournaments.find({
-      order: { season: 'DESC', name: 'ASC' },
-    });
+  async findAll(paginationDto: PaginationDto): Promise<PaginatedResult<Tournament>> {
+    const { page = 1, limit = 10, search, format, status, season } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.tournaments.createQueryBuilder('tournament')
+      .orderBy('tournament.season', 'DESC')
+      .addOrderBy('tournament.name', 'ASC')
+      .skip(skip)
+      .take(limit);
+
+    if (search) {
+      queryBuilder.andWhere(
+        '(tournament.name ILIKE :search OR tournament.description ILIKE :search)',
+        { search: `%${search}%` }
+      );
+    }
+    if (format) {
+      queryBuilder.andWhere('tournament.format = :format', { format });
+    }
+    if (status) {
+      queryBuilder.andWhere('tournament.status = :status', { status });
+    }
+    if (season) {
+      queryBuilder.andWhere('tournament.season = :season', { season });
+    }
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findById(id: string): Promise<Tournament> {

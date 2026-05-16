@@ -35,6 +35,25 @@ export interface AuthResponse {
   user: AuthUser;
 }
 
+export interface PaginatedResult<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  format?: string;
+  status?: string;
+  season?: string;
+}
+
 export interface LoginPayload {
   email: string;
   password: string;
@@ -652,8 +671,16 @@ export const api = {
   },
 
   // ---- Tournaments ----
-  listTournaments() {
-    return request<Tournament[]>("/tournaments");
+  listTournaments(params?: PaginationParams) {
+    const query = new URLSearchParams();
+    if (params?.page) query.append("page", String(params.page));
+    if (params?.limit) query.append("limit", String(params.limit));
+    if (params?.search) query.append("search", params.search);
+    if (params?.format) query.append("format", params.format);
+    if (params?.status) query.append("status", params.status);
+    if (params?.season) query.append("season", params.season);
+    const qs = query.toString();
+    return request<PaginatedResult<Tournament>>(qs ? `/tournaments?${qs}` : "/tournaments");
   },
 
   getTournament(id: string) {

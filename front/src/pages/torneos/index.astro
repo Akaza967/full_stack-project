@@ -135,6 +135,13 @@ import { Trophy, LayoutGrid, List } from "@lucide/astro";
       data-view="grid"
     >
     </ul>
+
+    <!-- Paginación -->
+    <div id="pagination" hidden class="mt-8 flex items-center justify-between border-t border-slate-200 pt-6 dark:border-slate-800">
+      <button id="btn-prev" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/80">Anterior</button>
+      <span id="page-info" class="text-sm font-medium text-slate-600 dark:text-slate-400">Página 1</span>
+      <button id="btn-next" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/80">Siguiente</button>
+    </div>
   </main>
 </Layout>
 
@@ -174,7 +181,22 @@ import { Trophy, LayoutGrid, List } from "@lucide/astro";
   const btnViewGrid = document.getElementById("btn-view-grid") as HTMLButtonElement | null;
   const btnViewList = document.getElementById("btn-view-list") as HTMLButtonElement | null;
 
+  const pagination = document.getElementById("pagination") as HTMLDivElement;
+  const btnPrev = document.getElementById("btn-prev") as HTMLButtonElement;
+  const btnNext = document.getElementById("btn-next") as HTMLButtonElement;
+  const pageInfo = document.getElementById("page-info") as HTMLSpanElement;
+
   let currentView: "grid" | "list" = (localStorage.getItem("tournament-view") as "grid" | "list") || "grid";
+  let currentPage = 1;
+  const LIMIT = 9;
+
+  // Llenar temporales de seasons (simulado ya que no traemos todos)
+  const currentYear = new Date().getFullYear();
+  const seasons = [currentYear + 1, currentYear, currentYear - 1, currentYear - 2].map(String);
+  seasonSelect?.replaceChildren(
+    createOption("", "Todas"),
+    ...seasons.map((season) => createOption(season, season))
+  );
 
   function updateViewButtons() {
     if (currentView === "grid") {
@@ -255,7 +277,7 @@ import { Trophy, LayoutGrid, List } from "@lucide/astro";
     badgeContainer.appendChild(badge);
 
     const name = document.createElement("h2");
-    name.className = "mt-3 truncate text-lg font-semibold text-slate-900";
+    name.className = "mt-3 truncate text-lg font-semibold text-slate-900 dark:text-white";
     name.textContent = t.name;
 
     const meta = document.createElement("p");
@@ -288,80 +310,94 @@ import { Trophy, LayoutGrid, List } from "@lucide/astro";
     empty.hidden = items.length !== 0;
   }
 
-  function normalize(value: string | null | undefined) {
-    return (value ?? "").toLowerCase();
+  async function loadTournaments() {
+    loading.hidden = false;
+    grid.hidden = true;
+    empty.hidden = true;
+    pagination.hidden = true;
+
+    try {
+      const search = searchInput?.value || undefined;
+      const format = formatSelect?.value || undefined;
+      const status = statusSelect?.value || undefined;
+      const season = seasonSelect?.value || undefined;
+
+      const result = await api.listTournaments({
+        page: currentPage,
+        limit: LIMIT,
+        search,
+        format,
+        status,
+        season
+      });
+
+      loading.hidden = true;
+
+      if (result.data.length === 0 && currentPage === 1) {
+        empty.hidden = false;
+      } else {
+        renderGrid(result.data);
+        
+        // Paginación UI
+        pagination.hidden = result.meta.totalPages <= 1;
+        btnPrev.disabled = result.meta.page <= 1;
+        btnNext.disabled = result.meta.page >= result.meta.totalPages;
+        pageInfo.textContent = `Página ${result.meta.page} de ${result.meta.totalPages}`;
+        
+        updateViewButtons();
+      }
+    } catch (err) {
+      loading.hidden = false;
+      loading.textContent =
+        err instanceof ApiError ? err.messages.join(" · ") : "Error al cargar los torneos";
+    }
   }
 
-  function applyFilters(tournaments: Tournament[]) {
-    const query = normalize(searchInput?.value);
-    const selectedFormat = formatSelect?.value ?? "";
-    const selectedStatus = statusSelect?.value ?? "";
-    const selectedSeason = seasonSelect?.value ?? "";
-    const selectedStart = startDateInput?.value ?? "";
-
-    const filtered = tournaments.filter((t) => {
-      if (selectedFormat && t.format !== selectedFormat) {
-        return false;
-      }
-      if (selectedStatus && t.status !== selectedStatus) {
-        return false;
-      }
-      if (selectedSeason && t.season !== selectedSeason) {
-        return false;
-      }
-      if (selectedStart) {
-        if (!t.startDate) {
-          return false;
-        }
-        const tournamentDate = new Date(t.startDate).toISOString().slice(0, 10);
-        if (tournamentDate < selectedStart) {
-          return false;
-        }
-      }
-      if (query) {
-        const label = `${t.name} ${t.description ?? ""} ${t.season}`.toLowerCase();
-        if (!label.includes(query)) {
-          return false;
-        }
-      }
-      return true;
-    });
-
-    renderGrid(filtered);
+  function handleFilterChange() {
+    currentPage = 1;
+    loadTournaments();
   }
 
-  function resetFilters(tournaments: Tournament[]) {
+  function resetFilters() {
     if (searchInput) searchInput.value = "";
     if (formatSelect) formatSelect.value = "";
     if (statusSelect) statusSelect.value = "";
     if (seasonSelect) seasonSelect.value = "";
-    if (startDateInput) startDateInput.value = "";
-    renderGrid(tournaments);
+    if (startDateInput) startDateInput.value = ""; // No lo mandamos al backend por ahora
+    handleFilterChange();
   }
 
-  try {
-    const tournaments = await api.listTournaments();
-    loading.hidden = true;
+  // Event Listeners
+  const inputs = [searchInput, formatSelect, statusSelect, seasonSelect, startDateInput];
+  
+  // Para inputs de texto es mejor usar debounce, pero para simplificar usaremos 'change' en select y un pequeño delay en search
+  let timeoutId: number;
+  searchInput?.addEventListener("input", () => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(handleFilterChange, 500);
+  });
+  
+  [formatSelect, statusSelect, seasonSelect, startDateInput].forEach(
+    input => input?.addEventListener("change", handleFilterChange)
+  );
 
-    if (tournaments.length === 0) {
-      empty.hidden = false;
-    } else {
-      const seasons = Array.from(new Set(tournaments.map((t) => t.season))).sort((a, b) => b.localeCompare(a));
-      seasonSelect?.replaceChildren(createOption("", "Todas"), ...seasons.map((season) => createOption(season, season)));
-      renderGrid(tournaments);
-      grid.hidden = false;
+  resetButton?.addEventListener("click", (event) => {
+    event.preventDefault();
+    resetFilters();
+  });
 
-      const inputs = [searchInput, formatSelect, statusSelect, seasonSelect, startDateInput];
-      inputs.forEach((input) => input?.addEventListener("input", () => applyFilters(tournaments)));
-      resetButton?.addEventListener("click", (event) => {
-        event.preventDefault();
-        resetFilters(tournaments);
-      });
-      
-      updateViewButtons();
+  btnPrev.addEventListener("click", () => {
+    if (currentPage > 1) {
+      currentPage--;
+      loadTournaments();
     }
-  } catch (err) {
-    loading.textContent =
-      err instanceof ApiError ? err.messages.join(" · ") : "Error al cargar";
-  }
+  });
+
+  btnNext.addEventListener("click", () => {
+    currentPage++;
+    loadTournaments();
+  });
+
+  // Carga inicial
+  loadTournaments();
 </script>
